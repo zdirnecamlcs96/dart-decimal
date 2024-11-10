@@ -3,6 +3,7 @@
 /// More dartdocs go here.
 library;
 
+export 'src/decimal.dart';
 export 'src/dart_decimal_base.dart';
 
 // TODO: Export any libraries intended for clients of this package.
