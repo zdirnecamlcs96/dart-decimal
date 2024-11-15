@@ -84,23 +84,8 @@ class DartDecimal implements Comparable<DartDecimal> {
   }
 
   DartDecimal operator /(DartDecimal other) {
-    var newAmount = amount ~/ other.amount;
-    var newPrecision = precision - other.precision;
-
-    if (newPrecision > maxPrecision) {
-      newAmount = newAmount ~/ pow(10, newPrecision - maxPrecision);
-      newPrecision = maxPrecision;
-    }
-
-    if (newPrecision < 0) {
-      newAmount = newAmount ~/ pow(10, newPrecision.abs());
-      newPrecision = 0;
-    }
-
-    return DartDecimal(
-      amount: newAmount,
-      precision: newPrecision,
-    );
+    final newAmount = _rational / other._rational;
+    return DartDecimal.parse(newAmount.toValidDouble());
   }
 
   @override

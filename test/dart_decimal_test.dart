@@ -77,6 +77,16 @@ void main() {
       expect(result.precision, 0);
     });
 
+    test('1.005 * 1000 = 1005', () {
+      final a = DartDecimal.parse(1.005);
+      final b = DartDecimal.parse(1000);
+      final result = a * b;
+      expect(result.amount, 1005);
+      expect(result.precision, 0);
+    });
+  });
+
+  group("Division", () {
     test('0.002 / 3 == 0', () {
       final left = DartDecimal(amount: 2, precision: 3);
       final right = DartDecimal(amount: 3, precision: 0);
@@ -85,12 +95,12 @@ void main() {
       expect(result.toDouble().truncateToDouble(), 0);
     });
 
-    test('1.005 * 1000 = 1005', () {
-      final a = DartDecimal.parse(1.005);
-      final b = DartDecimal.parse(1000);
-      final result = a * b;
-      expect(result.amount, 1005);
-      expect(result.precision, 0);
+    test('575 / 50 == 11.5', () {
+      final left = DartDecimal(amount: 575, precision: 0);
+      final right = DartDecimal(amount: 50, precision: 0);
+
+      final result = left / right;
+      expect(result.toDouble(), 11.5);
     });
   });
 
