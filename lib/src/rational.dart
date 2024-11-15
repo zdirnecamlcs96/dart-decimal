@@ -2,71 +2,43 @@ import 'dart:math';
 
 final _pattern = RegExp(r'^([+-]?\d*)(\.\d*)?([eE][+-]?\d+)?$');
 
+/// pow(10, 19) = -8446744073709551616
+/// pow(10, 20) = 7766279631452241920
+const maxPrecision = 18;
+
 class RationalNumber {
-  final int numerator;
-  final int denominator;
+  final BigInt numerator;
+  final BigInt denominator;
 
   RationalNumber(this.numerator, this.denominator) {
-    if (denominator == 0) {
-      throw ArgumentError('Denominator cannot be zero');
-    }
+    assert(denominator > BigInt.zero);
   }
 
-  int _gcd(int a, int b) {
-    if (b == 0) {
-      return a;
-    }
-    return _gcd(b, a % b);
+  num toValidDouble() {
+    final s = _simplify(); // possible to reduce computation
+    final doubleValue = s.numerator / s.denominator;
+    return doubleValue;
   }
 
-  static RationalNumber zero() {
-    return RationalNumber(0, 1);
+  static RationalNumber fromInt(int number) {
+    return RationalNumber(BigInt.from(number), BigInt.one);
   }
 
-  RationalNumber simplify() {
-    final gcd = _gcd(numerator, denominator);
-    return RationalNumber(numerator ~/ gcd, denominator ~/ gcd);
+  static RationalNumber fromDouble(double number) {
+    final stringNumber = number.toString();
+    return RationalNumber.parse(stringNumber);
   }
 
-  static RationalNumber fromDecimal(String number, int precision) {
-    final regexMatch = _pattern.firstMatch(number);
-
-    if (regexMatch == null) {
-      throw ArgumentError('Invalid number format');
-    }
-
-    final integerDigits = regexMatch.group(1);
-
-    if (integerDigits == null) {
-      throw ArgumentError('Invalid number format');
-    }
-
-    var totalDigits = integerDigits.length;
-
-    final floatingPointDigits = regexMatch.group(2);
-
-    if (floatingPointDigits != null) {
-      totalDigits += floatingPointDigits.substring(1).length;
-    }
-
-    final exponentDigits = regexMatch.group(3);
-
-    if (exponentDigits != null) {
-      var exponent = int.parse(exponentDigits.substring(1));
-      if (floatingPointDigits != null) {
-        exponent -= floatingPointDigits.substring(1).length;
-      }
-      exponent -= precision;
-
-      if (exponent < 0 && exponent.abs() > totalDigits) {
-        return zero();
-      }
-    }
-
-    return RationalNumber.parse(number);
+  static RationalNumber fromDecimal(num number, int precision) {
+    final rationalNum = RationalNumber.parse(number.toStringAsExponential(),
+        precision: precision);
+    return rationalNum;
   }
 
-  static RationalNumber parse(String value) {
+  static RationalNumber parse(
+    String value, {
+    int? precision,
+  }) {
     final regexMatch = _pattern.firstMatch(value.toString());
 
     if (regexMatch == null) {
@@ -82,57 +54,40 @@ class RationalNumber {
     final floatingPointDigits = regexMatch.group(2);
     final exponentDigits = regexMatch.group(3);
 
-    int numerator = 0;
-    int denominator = 1;
+    BigInt numerator = BigInt.zero;
+    BigInt denominator = BigInt.one;
 
     if (floatingPointDigits != null) {
-      for (var i = 1; i < floatingPointDigits.length; i++) {
-        denominator = denominator * 10;
+      var ignoredDigits = 0;
+      if (floatingPointDigits.length - 1 > maxPrecision) {
+        /// ignore the floating point digits after the max precision
+        ignoredDigits = floatingPointDigits.length - 1 - maxPrecision;
       }
-      numerator =
-          int.parse("$integerDigits${floatingPointDigits.substring(1)}");
+      for (var i = 1;
+          i < min(floatingPointDigits.length, maxPrecision + 1);
+          i++) {
+        denominator = denominator * 10.toBigInt();
+      }
+
+      /// truncate the floating point digits after the max precision without rounding
+      numerator = BigInt.parse(
+          "$integerDigits${floatingPointDigits.substring(1, floatingPointDigits.length - ignoredDigits)}");
     } else {
-      numerator = int.parse(integerDigits);
+      numerator = BigInt.parse(integerDigits);
     }
 
     if (exponentDigits != null) {
-      final exponent = int.parse(exponentDigits.substring(1));
-
-      // /// pow(10, 19) = -8446744073709551616
-      // /// pow(10, 20) = 7766279631452241920
+      final exponent =
+          int.parse(exponentDigits.substring(1)) - (precision ?? 0);
       if (exponent > 0) {
         String numeratorString = numerator.toString();
         for (var i = 0; i < exponent; i++) {
           numeratorString += '0';
         }
-        try {
-          numerator = int.parse(numeratorString);
-        } catch (e) {
-          if (e is FormatException) {
-            /// reduce the exponent to 18
-            final powerOfTen = (log(denominator) / log(10)).floor() + exponent;
-            final diffPrecision = powerOfTen - 18;
-
-            String denominatorString = denominator.toString();
-
-            for (var i = 0; i < diffPrecision; i++) {
-              numeratorString =
-                  numeratorString.substring(0, numeratorString.length - 1);
-              denominatorString = denominatorString.substring(
-                  0, denominator.toString().length - 1);
-            }
-
-            numerator = int.parse(numeratorString);
-            denominator = int.parse(denominatorString);
-          }
-        }
+        numerator = BigInt.parse(numeratorString);
       } else {
-        denominator *= pow(10, -exponent).toInt();
+        denominator = denominator * 10.toBigInt().pow(-exponent);
       }
-    }
-
-    if (numerator == denominator) {
-      return RationalNumber(1, 1);
     }
 
     return RationalNumber(numerator, denominator)._removeTrailingZeros();
@@ -141,12 +96,17 @@ class RationalNumber {
   /// numerator - 10
   /// denominator - 10
   RationalNumber _removeTrailingZeros() {
-    int countTrailingZeros(int number) {
+    int countTrailingZeros(BigInt number) {
+      if (number == BigInt.zero) {
+        return 0;
+      }
+
       int count = 0;
 
-      while (number % 10 == 0) {
+      while (number % 10.toBigInt() == BigInt.zero) {
         count++;
-        number ~/= 10; // Use integer division to remove the last digit
+        number ~/=
+            10.toBigInt(); // Use integer division to remove the last digit
       }
 
       return count;
@@ -157,12 +117,12 @@ class RationalNumber {
 
     final zeros = min(numeratorZeros, denominatorZeros);
 
-    int newNumerator = numerator;
-    int newDenominator = denominator;
+    BigInt newNumerator = numerator;
+    BigInt newDenominator = denominator;
 
     for (var i = 0; i < zeros; i++) {
-      newNumerator ~/= 10;
-      newDenominator ~/= 10;
+      newNumerator ~/= 10.toBigInt();
+      newDenominator ~/= 10.toBigInt();
     }
 
     return RationalNumber(newNumerator, newDenominator);
@@ -177,38 +137,136 @@ class RationalNumber {
   }
 
   RationalNumber operator +(RationalNumber other) {
-    int newNumerator =
+    BigInt newNumerator =
         numerator * other.denominator + other.numerator * denominator;
-    int newDenominator = denominator * other.denominator;
-    return RationalNumber(newNumerator, newDenominator);
+    BigInt newDenominator = denominator * other.denominator;
+    return RationalNumber(newNumerator, newDenominator)
+        ._removeTrailingZeros()
+        ._limitToMaxPrecision();
   }
 
   RationalNumber operator -(RationalNumber other) {
-    int newNumerator =
+    BigInt newNumerator =
         numerator * other.denominator - other.numerator * denominator;
-    int newDenominator = denominator * other.denominator;
-    return RationalNumber(newNumerator, newDenominator);
+    BigInt newDenominator = denominator * other.denominator;
+    return RationalNumber(newNumerator, newDenominator)
+        ._removeTrailingZeros()
+        ._limitToMaxPrecision();
   }
 
   RationalNumber operator *(RationalNumber other) {
-    int newNumerator = numerator * other.numerator;
-    int newDenominator = denominator * other.denominator;
-    return RationalNumber(newNumerator, newDenominator);
+    BigInt newNumerator = numerator * other.numerator;
+    BigInt newDenominator = denominator * other.denominator;
+    return RationalNumber(newNumerator, newDenominator)
+        ._removeTrailingZeros()
+        ._limitToMaxPrecision();
   }
 
   RationalNumber operator /(RationalNumber other) {
-    if (other.numerator == 0) {
-      throw ArgumentError("Cannot divide by zero");
+    assert(other.numerator > BigInt.zero);
+
+    BigInt newNumerator = numerator * other.denominator;
+    BigInt newDenominator = denominator * other.numerator;
+    return RationalNumber(newNumerator, newDenominator)
+        ._removeTrailingZeros()
+        ._limitToMaxPrecision();
+  }
+
+  // int operator %(RationalNumber other) {
+  //   if (other.numerator == 0) {
+  //     throw ArgumentError("Cannot divide by zero");
+  //   }
+  //   return numerator % other.numerator;
+  // }
+
+  RationalNumber _limitToMaxPrecision() {
+    BigInt newNumerator = numerator;
+    BigInt newDenominator = denominator;
+
+    final powerOfTen = newDenominator.toString().length - 1;
+    final diffPrecision = powerOfTen - maxPrecision;
+
+    for (var i = 0; i < diffPrecision; i++) {
+      final remainder = newNumerator % 10.toBigInt();
+
+      if (remainder > 5.toBigInt()) {
+        newNumerator += 10.toBigInt() - remainder;
+      } else {
+        newNumerator -= remainder;
+      }
+
+      newNumerator ~/= 10.toBigInt();
+      newDenominator ~/= 10.toBigInt();
     }
-    int newNumerator = numerator * other.denominator;
-    int newDenominator = denominator * other.numerator;
+
     return RationalNumber(newNumerator, newDenominator);
   }
 
-  int operator %(RationalNumber other) {
-    if (other.numerator == 0) {
-      throw ArgumentError("Cannot divide by zero");
+  BigInt _gcd(BigInt a, BigInt b) {
+    if (b == BigInt.zero) {
+      return a;
     }
-    return numerator % other.numerator;
+    return _gcd(b, a % b);
+  }
+
+  RationalNumber _simplify() {
+    BigInt gcd = _gcd(numerator, denominator);
+    return RationalNumber(numerator ~/ gcd, denominator ~/ gcd);
+  }
+}
+
+extension NumExtension on num {
+  BigInt toBigInt() {
+    return BigInt.from(this);
+  }
+
+  List<String> toScientificNotation() {
+    var numStr = toStringAsExponential();
+    var exponent = 0;
+
+    final regexMatch = _pattern.firstMatch(numStr.toString());
+
+    if (regexMatch == null) {
+      throw ArgumentError('Invalid number format');
+    }
+
+    final integerDigits = regexMatch.group(1);
+
+    exponent += integerDigits!.length - 1;
+
+    final floatingPointDigits = regexMatch.group(2);
+
+    exponent -= floatingPointDigits?.length ?? 0;
+
+    final exponentDigits = regexMatch.group(3);
+
+    if (exponentDigits != null) {
+      exponent += int.parse(exponentDigits.substring(1));
+    }
+
+    final dotIndex = numStr.indexOf('.');
+    if (dotIndex != -1) {
+      var str = numStr.substring(0, dotIndex);
+      var decimal = numStr.substring(dotIndex + 1);
+
+      /// Check how many leading zeros are there
+      var leadingZeros = 0;
+      var fullNumStr = str + decimal;
+      for (var i = 0; i < fullNumStr.length; i++) {
+        if (fullNumStr[i] == '0') {
+          leadingZeros++;
+          numStr = fullNumStr.substring(1);
+        } else {
+          break;
+        }
+      }
+      exponent -= leadingZeros;
+    }
+
+    var chars = numStr.split('');
+    chars.insert(1, ".");
+    numStr = chars.join();
+
+    return [numStr, exponent.toString()];
   }
 }
