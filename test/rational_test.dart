@@ -79,6 +79,9 @@ void main() {
       final doubleToRational = RationalNumber.parse(doubleResult.toString());
       expect(doubleToRational.numerator, equals(5263157894736842.toBigInt()));
       expect(doubleToRational.denominator, equals(pow(10, 16).toBigInt()));
+
+      expect(() => RationalNumber.parse("1") / RationalNumber.parse("0"),
+          throwsA(predicate((e) => e is AssertionError)));
     });
 
     test("Round Up", () {

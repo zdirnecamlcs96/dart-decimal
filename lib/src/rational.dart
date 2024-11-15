@@ -11,7 +11,7 @@ class RationalNumber {
   final BigInt denominator;
 
   RationalNumber(this.numerator, this.denominator) {
-    assert(denominator > BigInt.zero);
+    assert(denominator != BigInt.zero, "Division by zero is not allowed");
   }
 
   num toValidDouble() {
@@ -134,7 +134,7 @@ class RationalNumber {
   }
 
   RationalNumber operator /(RationalNumber other) {
-    assert(other.numerator > BigInt.zero);
+    assert(denominator != BigInt.zero, "Division by zero is not allowed");
 
     BigInt newNumerator = numerator * other.denominator;
     BigInt newDenominator = denominator * other.numerator;
