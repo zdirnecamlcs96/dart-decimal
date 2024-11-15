@@ -15,7 +15,9 @@ and the Flutter guide for
 
 ## Features
 
-Personal library that solve the floating point issue by using `BigInt`. But the precision only support up to 18 only as `DartDecimal` used `int` instead of `BigInt`.
+Dart Library that solve the floating point issue by using `BigInt`.
+
+**Note:** `DartDecimal` supports precision up to 18 digits because it uses `int` instead of `BigInt`. The purpose is to avoid unnecessarily large numbers or high precision, as they weren't needed for my use case. Additionally, `int` uses a fixed amount of memory and may be more efficient than `BigInt`.
 
 ## Getting started
 
@@ -50,7 +52,15 @@ TODO: Tell users more about the package: where to find more information, how to
 contribute to the package, how to file issues, what response they can expect
 from the package authors, and more. -->
 
-## Acknowledge
+## Disclaimer
 
-- Inspired by [dart-decimal](https://github.com/a14n/dart-decimal)
-- [Scientific Notation](https://www.mathsisfun.com/numbers/scientific-notation.html)
+This project is intended for personal use only. Use at your own risk. No warranty or support is provided. However, you are welcome to raise issues or submit pull requests.
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+## Acknowledgements
+
+- Inspired by [dart-decimal](https://github.com/a14n/dart-decimal).
+- Learned about scientific notation from [MathsIsFun](https://www.mathsisfun.com/numbers/scientific-notation.html).
