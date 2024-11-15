@@ -93,4 +93,27 @@ void main() {
       expect(result.precision, 0);
     });
   });
+
+  group("round to precision", () {
+    test('0.4 to 3 precision == 0.4 instead of 0.400', () {
+      final d = DartDecimal(amount: 4, precision: 1);
+      final result = d.roundToPrecision(3);
+      expect(result.amount, 4);
+      expect(result.precision, 1);
+    });
+
+    test('0.47 to 1 precision == 0.5', () {
+      final d = DartDecimal(amount: 47, precision: 2);
+      final result = d.roundToPrecision(1);
+      expect(result.amount, 5);
+      expect(result.precision, 1);
+    });
+
+    test('0.22 to 1 precision == 0.2', () {
+      final d = DartDecimal(amount: 22, precision: 2);
+      final result = d.roundToPrecision(1);
+      expect(result.amount, 2);
+      expect(result.precision, 1);
+    });
+  });
 }

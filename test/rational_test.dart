@@ -80,5 +80,15 @@ void main() {
       expect(doubleToRational.numerator, equals(5263157894736842.toBigInt()));
       expect(doubleToRational.denominator, equals(pow(10, 16).toBigInt()));
     });
+
+    test("Round Up", () {
+      final doubleToRational = RationalNumber.parse("0.5263157894736842");
+      expect(doubleToRational.numerator, equals(5263157894736842.toBigInt()));
+      expect(doubleToRational.denominator, equals(pow(10, 16).toBigInt()));
+
+      final rounded = doubleToRational.roundTo(10);
+      expect(rounded.numerator, equals(5263157895.toBigInt()));
+      expect(rounded.denominator, equals(pow(10, 10).toBigInt()));
+    });
   });
 }

@@ -47,6 +47,15 @@ class DartDecimal implements Comparable<DartDecimal> {
     return double.parse(v.toStringAsFixed(precision.toInt()));
   }
 
+  DartDecimal roundToPrecision(int precision) {
+    final r = _rational.roundTo(precision);
+
+    return DartDecimal(
+      amount: r.numerator.toInt(),
+      precision: logBase10(r.denominator).toInt(),
+    );
+  }
+
   DartDecimal operator +(DartDecimal other) {
     final newAmount = _rational + other._rational;
 

@@ -20,6 +20,10 @@ class RationalNumber {
     return doubleValue;
   }
 
+  RationalNumber roundTo(int precision) {
+    return _limitToMaxPrecision(precision: precision);
+  }
+
   static RationalNumber fromInt(int number) {
     return RationalNumber(BigInt.from(number), BigInt.one);
   }
@@ -95,41 +99,6 @@ class RationalNumber {
         ._limitToMaxPrecision();
   }
 
-  /// numerator - 10
-  /// denominator - 10
-  RationalNumber _removeTrailingZeros() {
-    int countTrailingZeros(BigInt number) {
-      if (number == BigInt.zero) {
-        return 0;
-      }
-
-      int count = 0;
-
-      while (number % 10.toBigInt() == BigInt.zero) {
-        count++;
-        number ~/=
-            10.toBigInt(); // Use integer division to remove the last digit
-      }
-
-      return count;
-    }
-
-    final numeratorZeros = countTrailingZeros(numerator);
-    final denominatorZeros = countTrailingZeros(denominator);
-
-    final zeros = min(numeratorZeros, denominatorZeros);
-
-    BigInt newNumerator = numerator;
-    BigInt newDenominator = denominator;
-
-    for (var i = 0; i < zeros; i++) {
-      newNumerator ~/= 10.toBigInt();
-      newDenominator ~/= 10.toBigInt();
-    }
-
-    return RationalNumber(newNumerator, newDenominator);
-  }
-
   static RationalNumber? tryParse(String value) {
     try {
       return parse(value);
@@ -181,12 +150,47 @@ class RationalNumber {
   //   return numerator % other.numerator;
   // }
 
-  RationalNumber _limitToMaxPrecision() {
+  RationalNumber _removeTrailingZeros() {
+    int countTrailingZeros(BigInt number) {
+      if (number == BigInt.zero) {
+        return 0;
+      }
+
+      int count = 0;
+
+      while (number % 10.toBigInt() == BigInt.zero) {
+        count++;
+        number ~/=
+            10.toBigInt(); // Use integer division to remove the last digit
+      }
+
+      return count;
+    }
+
+    final numeratorZeros = countTrailingZeros(numerator);
+    final denominatorZeros = countTrailingZeros(denominator);
+
+    final zeros = min(numeratorZeros, denominatorZeros);
+
+    BigInt newNumerator = numerator;
+    BigInt newDenominator = denominator;
+
+    for (var i = 0; i < zeros; i++) {
+      newNumerator ~/= 10.toBigInt();
+      newDenominator ~/= 10.toBigInt();
+    }
+
+    return RationalNumber(newNumerator, newDenominator);
+  }
+
+  RationalNumber _limitToMaxPrecision({
+    int precision = maxPrecision,
+  }) {
     BigInt newNumerator = numerator;
     BigInt newDenominator = denominator;
 
     final powerOfTen = newDenominator.toString().length - 1;
-    final diffPrecision = powerOfTen - maxPrecision;
+    final diffPrecision = powerOfTen - precision;
 
     for (var i = 0; i < diffPrecision; i++) {
       final remainder = newNumerator % 10.toBigInt();
