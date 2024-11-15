@@ -4,22 +4,6 @@ import 'package:test/test.dart';
 import 'package:dart_decimal/src/rational.dart';
 
 void main() {
-  // test('stress test', () {
-  //   final start = 0.001;
-  //   final end = 10;
-
-  //   for (num i = start; i <= end; i++) {
-  //     for (num j = start; j <= end; j++) {
-  //       final rational1 = RationalNumber.parse(i);
-  //       final rational2 = RationalNumber.parse(j);
-  //       final result = rational1 + rational2;
-  //       print('$i + $j = ${result.numerator}');
-  //       expect(result.numerator, equals(i + j));
-  //       expect(result.denominator, equals(1));
-  //     }
-  //   }
-  // });
-
   group("scientific notation", () {
     test("scientific notation", () {
       /// 15 fractional digits
@@ -50,19 +34,6 @@ void main() {
       final f = RationalNumber.parse("0.1999999999999999999");
       expect(f.numerator, equals(199999999999999999.toBigInt()));
       expect(f.denominator, equals(10.toBigInt().pow(18)));
-    });
-
-    test("toScientificNotation", () {
-      expect(0.1234567890123456789.toStringAsExponential(),
-          equals("1.2345678901234568e-1"));
-      // expect(1234567890123456789.toScientificNotation()[0],
-      //     equals("1.234567890123456789"));
-      // expect(1234567890123456789.toScientificNotation()[1], equals("18"));
-      // expect(0.1234567890123456789.toScientificNotation()[0],
-      //     equals("1.234567890123456789"));
-      // expect(0.1234567890123456789.toScientificNotation()[1], equals("-1"));
-      // expect(0.0000000000000000001.toScientificNotation()[0], equals("1.0"));
-      // expect(0.0000000000000000001.toScientificNotation()[1], equals("-19"));
     });
 
     test("scientific notation with precision", () {

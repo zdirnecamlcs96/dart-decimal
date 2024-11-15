@@ -1,9 +1,8 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
-library;
+library dart_decimal;
 
 export 'src/decimal.dart';
-export 'src/dart_decimal_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/rational.dart';
+export 'src/utils.dart';

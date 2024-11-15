@@ -40,7 +40,7 @@ to `/example` folder. -->
 ```dart
 // 1.005 * 1000 = 1004.9999999999999
 final a = DartDecimal(amount: 1005, precision: 3);
-final a = DartDecimal.parse(1000);
+final b = DartDecimal.parse(1000);
 final result = a - b; // 1.005
 ```
 
