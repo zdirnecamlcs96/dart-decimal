@@ -79,11 +79,8 @@ void main() {
       /// = 9223372036854776 / 10^-41
       final rational = RationalNumber.fromDecimal(amount, precision);
 
-      expect(rational.numerator, equals(9223372036854776.toBigInt()));
-      expect(
-          rational.denominator,
-          equals(BigInt.parse(
-              "100000000000000000000000000000000000000000"))); // 10^41
+      expect(rational.numerator, equals(BigInt.zero));
+      expect(rational.denominator, equals(BigInt.one));
     });
 
     test("Subtraction", () {

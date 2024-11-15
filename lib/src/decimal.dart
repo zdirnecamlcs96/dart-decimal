@@ -33,19 +33,11 @@ class DartDecimal implements Comparable<DartDecimal> {
   }
 
   static parse(num value) {
-    final precision = getPrecision(value, trailingZeroes: false);
-
-    int eIndex = value.toString().indexOf('e');
-    if (eIndex != -1) {
-      var str = value.toString().substring(0, eIndex);
-      value = double.parse(str);
-    }
-
-    final amount = (value * pow(10, precision)).toInt();
+    final rationalNum = RationalNumber.parse(value.toStringAsExponential());
 
     return DartDecimal(
-      amount: amount,
-      precision: precision,
+      amount: rationalNum.numerator.toInt(),
+      precision: logBase10(rationalNum.denominator).toInt(),
     );
   }
 
@@ -74,11 +66,11 @@ class DartDecimal implements Comparable<DartDecimal> {
   }
 
   DartDecimal operator *(DartDecimal other) {
-    var newAmount = amount * other.amount;
-    var newPrecision = precision + other.precision;
+    final newAmount = _rational * other._rational;
+
     return DartDecimal(
-      amount: newAmount,
-      precision: newPrecision,
+      amount: newAmount.numerator.toInt(),
+      precision: logBase10(newAmount.denominator).toInt(),
     );
   }
 

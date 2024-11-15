@@ -46,8 +46,8 @@ void main() {
       final right = DartDecimal(amount: 3, precision: 1);
 
       final result = left * right;
-      expect(result.amount, 30);
-      expect(result.precision, 1);
+      expect(result.amount, 3);
+      expect(result.precision, 0);
     });
 
     test('10 * 1 == 1', () {
@@ -83,6 +83,14 @@ void main() {
 
       final result = left / right;
       expect(result.toDouble().truncateToDouble(), 0);
+    });
+
+    test('1.005 * 1000 = 1005', () {
+      final a = DartDecimal.parse(1.005);
+      final b = DartDecimal.parse(1000);
+      final result = a * b;
+      expect(result.amount, 1005);
+      expect(result.precision, 0);
     });
   });
 }

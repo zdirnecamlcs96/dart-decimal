@@ -90,7 +90,9 @@ class RationalNumber {
       }
     }
 
-    return RationalNumber(numerator, denominator)._removeTrailingZeros();
+    return RationalNumber(numerator, denominator)
+        ._removeTrailingZeros()
+        ._limitToMaxPrecision();
   }
 
   /// numerator - 10
@@ -189,14 +191,24 @@ class RationalNumber {
     for (var i = 0; i < diffPrecision; i++) {
       final remainder = newNumerator % 10.toBigInt();
 
-      if (remainder > 5.toBigInt()) {
-        newNumerator += 10.toBigInt() - remainder;
+      if (remainder >= 5.toBigInt()) {
+        if (newNumerator.isNegative) {
+          newNumerator -= 10.toBigInt() - remainder;
+        } else {
+          newNumerator += 10.toBigInt() - remainder;
+        }
       } else {
         newNumerator -= remainder;
       }
 
       newNumerator ~/= 10.toBigInt();
       newDenominator ~/= 10.toBigInt();
+    }
+
+    /// If the diffPrecision > numerator length, then the numerator probably is zero
+    /// Since the numerator is zero, the denominator will always be 1
+    if (newNumerator == BigInt.zero) {
+      newDenominator = BigInt.one;
     }
 
     return RationalNumber(newNumerator, newDenominator);
