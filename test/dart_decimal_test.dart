@@ -102,6 +102,22 @@ void main() {
       final result = left / right;
       expect(result.toDouble(), 11.5);
     });
+
+    test("114.4 / 15.2 = 7.5263157895 * 15.2 = 114.4000000004", () {
+      final a = DartDecimal.fromDecimal(
+        amount: 11440,
+        precision: 2,
+      );
+      final b = DartDecimal.fromDecimal(
+        amount: 152,
+        precision: 1,
+      );
+      final result = a / b * b;
+
+      // 7.5263157895 * 15.2 = 114.4000000004 (rounded to 1 precision)
+      expect(result.amount, equals(1144)); // 114.4
+      expect(result.precision, equals(1));
+    });
   });
 
   group("round to precision", () {

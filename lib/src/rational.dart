@@ -126,6 +126,11 @@ class RationalNumber {
   }
 
   RationalNumber operator *(RationalNumber other) {
+    // Special cases: when either numerator is zero
+    if (numerator == BigInt.zero || other.numerator == BigInt.zero) {
+      return RationalNumber(BigInt.zero, BigInt.one);
+    }
+
     BigInt newNumerator = numerator * other.numerator;
     BigInt newDenominator = denominator * other.denominator;
     return RationalNumber(newNumerator, newDenominator)
@@ -134,7 +139,17 @@ class RationalNumber {
   }
 
   RationalNumber operator /(RationalNumber other) {
-    assert(denominator != BigInt.zero, "Division by zero is not allowed");
+    assert(other.numerator != BigInt.zero, "Division by zero is not allowed");
+
+    // Special case: only when numerator is zero
+    if (numerator == BigInt.zero) {
+      return RationalNumber(BigInt.zero, BigInt.one);
+    }
+
+    // When dividing by x/x, it's same as dividing by 1
+    if (other.numerator == other.denominator) {
+      return this;
+    }
 
     BigInt newNumerator = numerator * other.denominator;
     BigInt newDenominator = denominator * other.numerator;

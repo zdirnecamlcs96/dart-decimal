@@ -76,11 +76,7 @@ class DartDecimal implements Comparable<DartDecimal> {
 
   DartDecimal operator *(DartDecimal other) {
     final newAmount = _rational * other._rational;
-
-    return DartDecimal(
-      amount: newAmount.numerator.toInt(),
-      precision: logBase10(newAmount.denominator).toInt(),
-    );
+    return DartDecimal.parse(newAmount.toValidDouble());
   }
 
   DartDecimal operator /(DartDecimal other) {

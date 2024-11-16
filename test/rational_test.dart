@@ -8,28 +8,25 @@ void main() {
     test("scientific notation", () {
       /// 15 fractional digits
       /// 24 exponent digits
-      String a = "9.223372036854776e+24";
-      expect(RationalNumber.parse(a).numerator,
-          BigInt.parse("9223372036854776000000000"));
+      final a = RationalNumber.parse("9.223372036854776e+24");
+      expect(a.numerator, BigInt.parse("9223372036854776000000000"));
 
-      String b = "1.2345e+5"; // 123450.0
-      expect(RationalNumber.parse(b).numerator, equals(123450.toBigInt()));
-      expect(RationalNumber.parse(b).denominator, equals(BigInt.one));
+      final b = RationalNumber.parse("1.2345e+5"); // 123450.0
+      expect(b.numerator, equals(123450.toBigInt()));
+      expect(b.denominator, equals(BigInt.one));
 
-      String c = "1.000000000000000000";
-      expect(RationalNumber.parse(c).numerator, equals(BigInt.one));
-      expect(RationalNumber.parse(c).denominator, equals(BigInt.one));
+      final c = RationalNumber.parse("1.000000000000000000");
+      expect(c.numerator, equals(BigInt.one));
+      expect(c.denominator, equals(BigInt.one));
 
-      String d = "1.000050000000000000";
-      expect(RationalNumber.parse(d).numerator, equals(100005.toBigInt()));
-      expect(RationalNumber.parse(d).denominator, equals(10.toBigInt().pow(5)));
+      final d = RationalNumber.parse("1.000050000000000000");
+      expect(d.numerator, equals(100005.toBigInt()));
+      expect(d.denominator, equals(10.toBigInt().pow(5)));
 
       /// Max precision is 18, so the last 2 digits are ignored
-      String e = "0.1234567890123456789";
-      expect(RationalNumber.parse(e).numerator,
-          equals(123456789012345678.toBigInt()));
-      expect(
-          RationalNumber.parse(e).denominator, equals(10.toBigInt().pow(18)));
+      final e = RationalNumber.parse("0.1234567890123456789");
+      expect(e.numerator, equals(123456789012345678.toBigInt()));
+      expect(e.denominator, equals(10.toBigInt().pow(18)));
 
       final f = RationalNumber.parse("0.1999999999999999999");
       expect(f.numerator, equals(199999999999999999.toBigInt()));
@@ -48,10 +45,17 @@ void main() {
       /// 9223372036854776 × 10^9 / 10^50
       /// = 9223372036854776 × 10^(9-50)
       /// = 9223372036854776 / 10^-41
-      final rational = RationalNumber.fromDecimal(amount, precision);
+      final a = RationalNumber.fromDecimal(amount, precision);
 
-      expect(rational.numerator, equals(BigInt.zero));
-      expect(rational.denominator, equals(BigInt.one));
+      expect(a.numerator, equals(BigInt.zero));
+      expect(a.denominator, equals(BigInt.one));
+
+      final b = RationalNumber.parse(
+        11440.toStringAsExponential(),
+        precision: 2,
+      );
+      expect(b.numerator, equals(1144.toBigInt()));
+      expect(b.denominator, equals(10.toBigInt()));
     });
 
     test("Subtraction", () {
@@ -82,6 +86,19 @@ void main() {
 
       expect(() => RationalNumber.parse("1") / RationalNumber.parse("0"),
           throwsA(predicate((e) => e is AssertionError)));
+
+      final zero1 = RationalNumber.parse("0") / RationalNumber.parse("228");
+      expect(zero1.numerator, equals(BigInt.zero));
+    });
+
+    test("Multiply", () {
+      final zero1 = RationalNumber.parse("1234") * RationalNumber.parse("0");
+      expect(zero1.numerator, equals(BigInt.zero));
+      expect(zero1.denominator, equals(BigInt.one));
+
+      final zero2 = RationalNumber.parse("0") * RationalNumber.parse("77834");
+      expect(zero2.numerator, equals(BigInt.zero));
+      expect(zero1.denominator, equals(BigInt.one));
     });
 
     test("Round Up", () {
