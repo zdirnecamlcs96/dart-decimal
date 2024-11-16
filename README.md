@@ -46,11 +46,36 @@ final b = DartDecimal.parse(1000);
 final result = a - b; // 1.005
 ```
 
-<!-- ## Additional information
+## Edge Cases
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more. -->
+### Intermediate rounding with limited precision
+
+When performing calculations with limited precision (e.g., rounding to 10 decimal places), discrepancies can arise if intermediate results are rounded too early. Rounding early may cause small errors when those rounded values are used in subsequent calculations, leading to minor discrepancies in the final result.
+
+#### Example 1: Continuous Calculation (No Intermediate Rounding)
+
+```dart
+// No rounding until the final result (a / b * c)
+final a = DartDecimal.parse(114.4);
+final b = DartDecimal.parse(15.2);
+final c = a / b; // 7.526315789473684 (full precision)
+final result = c * b; // 114.4 (exact result)
+```
+
+#### Example 2: Intermediate Rounding (Round After Division)
+
+```dart
+// Intermediate rounding (a / b).roundTo(10) * c
+final a = DartDecimal.parse(114.4);
+final b = DartDecimal.parse(15.2);
+final c = (a / b)roundToPrecision(10); // 7.5263157895 (rounded to 10 decimal places)
+final result = c * b; // 114.4000000004 (slight discrepancy due to rounding)
+```
+
+### How to handle it
+
+1. **Avoid Intermediate Rounding** to prevent such discrepancies.
+2. For the use case above, **check if `b` is the same as the `c`** and return `a` directly without further manipulation to ensure the expected outcome.
 
 ## Disclaimer
 
