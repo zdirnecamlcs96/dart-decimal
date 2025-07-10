@@ -141,5 +141,29 @@ void main() {
       expect(result.amount, 2);
       expect(result.precision, 1);
     });
+
+    test('890.9913293236 - 1.446468288', () {
+      final left = DartDecimal(amount: 8909913293236, precision: 10);
+      final right = DartDecimal.fromDecimal(amount: 1446468288, precision: 9);
+      final result = left - right;
+      final roundToTen = result.roundToPrecision(10);
+      expect(roundToTen.amount, 8895448610356);
+      expect(roundToTen.precision, 10);
+    });
+  });
+
+  group("Divide and Multiply", () {
+    test('890.9913293236 / 37160', () {
+      final left = DartDecimal(amount: 8909913293236, precision: 10);
+      final right = DartDecimal(amount: 37160, precision: 0);
+      final result = left / right;
+      expect(result.amount, 23977161714843917);
+      expect(result.precision, 18);
+
+      final multiplied = result * DartDecimal(amount: 60, precision: 0);
+
+      expect(multiplied.amount, 1438629702890635);
+      expect(multiplied.precision, 15);
+    });
   });
 }
